@@ -22,8 +22,9 @@ impl Bar
         }
     }
 
-    pub fn push(&mut self, module: Box<dyn Module>) {
+    pub fn push(mut self, module: Box<dyn Module>) -> Self {
         self.modules.push(module);
+        self
     }
 
     pub fn run(mut self) -> error::IResult<()> {
