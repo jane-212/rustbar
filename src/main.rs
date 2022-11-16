@@ -19,3 +19,4 @@ fn main() -> error::IResult<()> {
         .push(Box::new(Time::new()))
         .run()
 }
+
