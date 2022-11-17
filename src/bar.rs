@@ -1,69 +1,67 @@
-use std::{
-    time::Duration, thread,
-    process::Command
-};
-
 use crate::error;
+use async_trait::async_trait;
+use tokio::{process::Command, time::{self, Duration}};
 
-pub struct Bar
-{
-    interval: u64,
+pub struct Bar {
+    interval: Duration,
     modules: Vec<Box<dyn Module>>,
-    bar: String
+    bar: String,
 }
 
-impl Bar
-{
-    pub fn new() -> Self {
-        Self{
-            interval: 1,
-            modules: Vec::new(),
-            bar: String::new()
+impl Default for Bar {
+    fn default() -> Self {
+        Self {
+            interval: Duration::from_secs(1),
+            modules: Vec::default(),
+            bar: String::default()
         }
     }
+}
 
+impl Bar {
     pub fn push(mut self, module: Box<dyn Module>) -> Self {
         self.modules.push(module);
         self
     }
 
-    pub fn run(mut self) -> error::IResult<()> {
+    pub async fn run(mut self) -> error::IResult<()> {
         loop {
-            self.update()?;
-            self.render()?;
+            self.update().await?;
+            self.render().await?;
 
-            thread::sleep(Duration::from_secs(self.interval));
+            time::sleep(self.interval).await;
         }
     }
 
-    pub fn update(&mut self) -> error::IResult<()> {
+    pub async fn update(&mut self) -> error::IResult<()> {
         for module in &mut self.modules {
-            module.update()?;
+            module.update().await?;
         }
 
         Ok(())
     }
 
-    pub fn render(&mut self) -> error::IResult<()> {
+    pub async fn render(&mut self) -> error::IResult<()> {
         self.bar.clear();
 
         for module in &self.modules {
             self.bar.push('|');
-            self.bar.push_str(&module.render()?);
+            self.bar.push_str(&module.render().await?);
         }
 
-        self.set_root()?;
+        self.set_root().await?;
 
         Ok(())
     }
 
-
-    fn set_root(&self) -> error::IResult<()> {
+    async fn set_root(&self) -> error::IResult<()> {
         if Command::new("xsetroot")
             .arg("-name")
             .arg(&self.bar)
-            .status()?
-            .success() {
+            .status()
+            .await?
+            .success()
+        {
             Ok(())
         } else {
             Err("execute xsetroot failed".into())
@@ -71,8 +69,8 @@ impl Bar
     }
 }
 
+#[async_trait]
 pub trait Module {
-    fn update(&mut self) -> error::IResult<()>;
-    fn render(&self) -> error::IResult<String>;
+    async fn update(&mut self) -> error::IResult<()>;
+    async fn render(&self) -> error::IResult<String>;
 }
-

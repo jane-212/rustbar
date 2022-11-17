@@ -1,14 +1,16 @@
 use crate::bar::Module;
 use crate::error;
-use std::{fs, path::PathBuf};
+use async_trait::async_trait;
+use std::path::PathBuf;
+use tokio::fs;
 
 pub struct Version {
     filename: PathBuf,
     version: String,
 }
 
-impl Version {
-    pub fn new() -> Self {
+impl Default for Version {
+    fn default() -> Self {
         Self {
             filename: PathBuf::from("/proc/version"),
             version: String::new(),
@@ -16,9 +18,11 @@ impl Version {
     }
 }
 
+#[async_trait]
 impl Module for Version {
-    fn update(&mut self) -> error::IResult<()> {
-        self.version = fs::read_to_string(&self.filename)?
+    async fn update(&mut self) -> error::IResult<()> {
+        self.version = fs::read_to_string(&self.filename)
+            .await?
             .split_whitespace()
             .nth(2)
             .unwrap_or("unknown")
@@ -27,7 +31,7 @@ impl Module for Version {
         Ok(())
     }
 
-    fn render(&self) -> error::IResult<String> {
+    async fn render(&self) -> error::IResult<String> {
         Ok(format!("  {} ", self.version))
     }
 }

@@ -1,6 +1,8 @@
 use crate::bar::Module;
 use crate::error;
-use std::{fs, path::PathBuf};
+use async_trait::async_trait;
+use std::path::PathBuf;
+use tokio::fs;
 
 pub struct Memory {
     filename: PathBuf,
@@ -8,8 +10,8 @@ pub struct Memory {
     total: u64,
 }
 
-impl Memory {
-    pub fn new() -> Self {
+impl Default for  Memory {
+    fn default() -> Self {
         Self {
             filename: PathBuf::from("/proc/meminfo"),
             available: 0,
@@ -18,11 +20,18 @@ impl Memory {
     }
 }
 
+#[async_trait]
 impl Module for Memory {
-    fn update(&mut self) -> error::IResult<()> {
-        for (i, line) in fs::read_to_string(&self.filename)?.lines().take(3).enumerate() {
+    async fn update(&mut self) -> error::IResult<()> {
+        for (i, line) in fs::read_to_string(&self.filename)
+            .await?
+            .lines()
+            .take(3)
+            .enumerate()
+        {
             if i == 0 {
-                self.total = line.split_whitespace()
+                self.total = line
+                    .split_whitespace()
                     .nth(1)
                     .unwrap_or("unknown")
                     .parse::<u64>()
@@ -30,7 +39,8 @@ impl Module for Memory {
             }
 
             if i == 2 {
-                self.available = line.split_whitespace()
+                self.available = line
+                    .split_whitespace()
                     .nth(1)
                     .unwrap_or("unknown")
                     .parse::<u64>()
@@ -41,7 +51,11 @@ impl Module for Memory {
         Ok(())
     }
 
-    fn render(&self) -> error::IResult<String> {
-        Ok(format!("  {:.1}Gb/{:.1}Gb ", (self.total - self.available) as f64 / (1024.0 * 1024.0), self.total as f64 / (1024.0 * 1024.0)))
+    async fn render(&self) -> error::IResult<String> {
+        Ok(format!(
+            "  {:.1}Gb/{:.1}Gb ",
+            (self.total - self.available) as f64 / (1024.0 * 1024.0),
+            self.total as f64 / (1024.0 * 1024.0)
+        ))
     }
 }
