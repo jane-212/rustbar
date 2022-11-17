@@ -37,7 +37,7 @@ struct Data {
 impl Default for Weather {
     fn default() -> Self {
         Self {
-            url: "https://www.yiketianqi.com/free/day?appid=52157466&appsecret=NS3Eh7NI&unescape=1",
+            url: "https://www.yiketianqi.com/free/day?appid=52157466&appsecret=NS3Eh7NI",
             data: Data::default(),
             last_tick: Instant::now(),
             interval: Duration::from_secs(60 * 60),
@@ -91,8 +91,14 @@ impl Module for Weather {
         };
 
         Ok(format!(
-            " {} {} {}/{} ",
-            wea, data.tem, data.tem_day, data.tem_night
+            " wea: {} qua: {} tem: {} max/min: {}/{} pres: {} humi: {} ",
+            wea,
+            data.air,
+            data.tem,
+            data.tem_day,
+            data.tem_night,
+            data.pressure,
+            data.humidity
         ))
     }
 }

@@ -50,9 +50,9 @@ impl Module for Net {
         let diff = (self.bytes - self.last_bytes) as f64 / 1024.0;
 
         if diff < 1024.0 {
-            Ok(format!("  {:.1}Kb/s ", diff))
+            Ok(format!(" down: {:.1}Kb/s ", diff))
         } else {
-            Ok(format!("  {:.1}Mb/s ", diff / 1024.0))
+            Ok(format!(" down: {:.1}Mb/s ", diff / 1024.0))
         }
     }
 }
