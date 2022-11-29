@@ -53,7 +53,7 @@ impl Module for Memory {
 
     async fn render(&self) -> error::IResult<String> {
         Ok(format!(
-            " mem: {:.1}Gb/{:.1}Gb ",
+            "  {:.1}Gb/{:.1}Gb ",
             (self.total - self.available) as f64 / (1024.0 * 1024.0),
             self.total as f64 / (1024.0 * 1024.0)
         ))

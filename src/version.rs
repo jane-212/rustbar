@@ -55,6 +55,6 @@ impl Module for Version {
     }
 
     async fn render(&self) -> error::IResult<String> {
-        Ok(format!(" arch: {} ", self.version))
+        Ok(format!("  {} ", self.version))
     }
 }

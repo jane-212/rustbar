@@ -23,7 +23,7 @@ impl Module for Time {
 
     async fn render(&self) -> error::IResult<String> {
         Ok(format!(
-            " date: {} time: {} ",
+            "  {} |  {} ",
             self.now.format("%Y-%m-%d"),
             self.now.format("%H:%M:%S")
         ))

@@ -91,7 +91,8 @@ impl Module for Weather {
         };
 
         Ok(format!(
-            " wea: {} qua: {} tem: {} max/min: {}/{} pres: {} humi: {} ",
+            "  {} | 摒 {}  {} |  {} / {}/{} |  {}  {} ",
+            data.city,
             wea,
             data.air,
             data.tem,
